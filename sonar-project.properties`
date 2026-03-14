@@ -1,0 +1,5 @@
+sonar.projectKey=harshinedevops_week12-cicd-docker
+sonar.organization=harshinedevops
+sonar.sources=.
+sonar.language=py
+sonar.python.version=3
