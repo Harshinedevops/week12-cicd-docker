@@ -1,9 +1,11 @@
 pipeline {
     agent any
+    
     environment {
-        DOCKER_IMAGE = "harshinedevops/week12-cicd"
+        DOCKER_IMAGE = "harshine10/week12-cicd"
         DOCKER_TAG = "${BUILD_NUMBER}"
     }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -11,20 +13,22 @@ pipeline {
                 checkout scm
             }
         }
+        
         stage('Build & Test') {
             steps {
                 echo '========== Running Tests =========='
-                sh 'pip3 install pytest'
+                sh 'pip3 install pytest --break-system-packages'
                 sh 'python3 -m pytest test_app.py -v'
             }
         }
+        
         stage('SonarCloud Analysis') {
             steps {
                 echo '========== Running SonarCloud Analysis =========='
                 withSonarQubeEnv('SonarCloud') {
                     sh '''/opt/sonar-scanner/bin/sonar-scanner \
-                        -Dsonar.projectKey=harshinedevops_week12-cicd-docker \
-                        -Dsonar.organization=harshinedevops \
+                        -Dsonar.projectKey=YOUR-SONAR-PROJECT-KEY \
+                        -Dsonar.organization=YOUR-SONAR-ORG-KEY \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.login=${SONAR_AUTH_TOKEN}
@@ -32,6 +36,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Docker Build') {
             steps {
                 echo '========== Building Docker Image =========='
@@ -39,6 +44,7 @@ pipeline {
                 sh "docker build -t ${DOCKER_IMAGE}:latest ."
             }
         }
+        
         stage('Push to DockerHub') {
             steps {
                 echo '========== Pushing to DockerHub =========='
@@ -53,6 +59,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Deploy') {
             steps {
                 echo '========== Deploying Container =========='
@@ -63,6 +70,7 @@ pipeline {
             }
         }
     }
+    
     post {
         success {
             echo '========== PIPELINE COMPLETED SUCCESSFULLY! =========='
