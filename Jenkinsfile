@@ -1,20 +1,16 @@
 pipeline {
     agent any
-
     environment {
         DOCKER_IMAGE = "harshine10/week12-cicd"
         DOCKER_TAG = "${BUILD_NUMBER}"
     }
-
     stages {
-
         stage('Checkout') {
             steps {
                 echo '========== Pulling Code from GitHub =========='
                 checkout scm
             }
         }
-
         stage('Build & Test') {
             steps {
                 echo '========== Running Tests =========='
@@ -22,7 +18,6 @@ pipeline {
                 sh 'python3 -m pytest test_app.py -v'
             }
         }
-
         stage('SonarCloud Analysis') {
             steps {
                 echo '========== Running SonarCloud Analysis =========='
@@ -31,7 +26,6 @@ pipeline {
                 }
             }
         }
-
         stage('Docker Build') {
             steps {
                 echo '========== Building Docker Image =========='
@@ -39,23 +33,32 @@ pipeline {
                 sh "docker build -t ${DOCKER_IMAGE}:latest ."
             }
         }
-
         stage('Push to DockerHub') {
             steps {
                 echo '========== Pushing to DockerHub =========='
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
                     sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                     sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
-
         stage('Deploy') {
             steps {
                 echo '========== Deploying Container =========='
-                sh "docker stop week12-app
+                sh "docker stop week12-app || true"
+                sh "docker rm week12-app || true"
+                sh "docker run -d --name week12-app -p 8888:8888 ${DOCKER_IMAGE}:latest"
+                echo 'App deployed successfully on port 8888!'
+            }
+        }
+    }
+    post {
+        success {
+            echo '========== PIPELINE COMPLETED SUCCESSFULLY! =========='
+        }
+        failure {
+            echo '========== PIPELINE FAILED! =========='
+        }
+    }
+}
