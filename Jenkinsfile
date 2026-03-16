@@ -29,7 +29,7 @@ pipeline {
                 withSonarQubeEnv('SonarCloud') {
                     sh """
                     /opt/sonar-scanner/bin/sonar-scanner \
-                    -Dsonar.projectKey=Harshine_week12-cicd-docker \
+                    -Dsonar.projectKey=week12-cicd-docker \
                     -Dsonar.organization=harshinedevops \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=https://sonarcloud.io \
@@ -66,12 +66,9 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 echo "========== Deploying Docker Container =========="
-
                 sh "docker stop week12-app || true"
                 sh "docker rm week12-app || true"
-
                 sh "docker run -d -p 8888:8888 --name week12-app ${DOCKER_IMAGE}:latest"
-
                 echo "Application deployed successfully!"
             }
         }
