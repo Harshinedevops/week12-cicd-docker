@@ -30,7 +30,7 @@ pipeline {
                     sh """
                     /opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.projectKey=Harshine_week12-cicd-docker \
-                    -Dsonar.organization=Harshine \
+                    -Dsonar.organization=harshinedevops \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=https://sonarcloud.io \
                     -Dsonar.login=\$SONAR_AUTH_TOKEN
