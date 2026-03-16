@@ -27,14 +27,14 @@ pipeline {
             steps {
                 echo "========== Running SonarCloud Analysis =========="
                 withSonarQubeEnv('SonarCloud') {
-                    sh """
+                    sh '''
                     /opt/sonar-scanner/bin/sonar-scanner \
-                    -Dsonar.projectKey=week12-cicd-docker \
+                    -Dsonar.projectKey=Harshinedevops_week12-cicd-docker \
                     -Dsonar.organization=harshinedevops \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=\$SONAR_AUTH_TOKEN
-                    """
+                    -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
         }
