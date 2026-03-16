@@ -10,14 +10,14 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo '========== Pulling Code from GitHub =========='
+                echo "========== Pulling Code from GitHub =========="
                 checkout scm
             }
         }
 
         stage('Build & Test') {
             steps {
-                echo '========== Running Tests =========='
+                echo "========== Running Tests =========="
                 sh 'pip3 install pytest'
                 sh 'python3 -m pytest test_app.py -v'
             }
@@ -25,23 +25,23 @@ pipeline {
 
         stage('SonarCloud Analysis') {
             steps {
-                echo '========== Running SonarCloud Analysis =========='
+                echo "========== Running SonarCloud Analysis =========="
                 withSonarQubeEnv('SonarCloud') {
-                    sh '''
+                    sh """
                     /opt/sonar-scanner/bin/sonar-scanner \
                     -Dsonar.projectKey=Harshine_week12-cicd-docker \
-                    -Dsonar.organization=harshine \
+                    -Dsonar.organization=Harshine \
                     -Dsonar.sources=. \
                     -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
+                    -Dsonar.login=\$SONAR_AUTH_TOKEN
+                    """
                 }
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo '========== Building Docker Image =========='
+                echo "========== Building Docker Image =========="
                 sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                 sh "docker build -t ${DOCKER_IMAGE}:latest ."
             }
@@ -49,7 +49,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                echo '========== Pushing to DockerHub =========='
+                echo "========== Pushing Docker Image =========="
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-credentials',
                     usernameVariable: 'DOCKER_USER',
@@ -63,23 +63,26 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Container') {
             steps {
-                echo '========== Deploying Container =========='
+                echo "========== Deploying Docker Container =========="
+
                 sh "docker stop week12-app || true"
                 sh "docker rm week12-app || true"
-                sh "docker run -d --name week12-app -p 8888:8888 ${DOCKER_IMAGE}:latest"
-                echo 'App deployed successfully on port 8888!'
+
+                sh "docker run -d -p 8888:8888 --name week12-app ${DOCKER_IMAGE}:latest"
+
+                echo "Application deployed successfully!"
             }
         }
     }
 
     post {
         success {
-            echo '========== PIPELINE COMPLETED SUCCESSFULLY! =========='
+            echo "========== PIPELINE COMPLETED SUCCESSFULLY =========="
         }
         failure {
-            echo '========== PIPELINE FAILED! =========='
+            echo "========== PIPELINE FAILED =========="
         }
     }
 }
