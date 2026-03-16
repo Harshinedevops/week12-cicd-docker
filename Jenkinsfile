@@ -18,7 +18,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 echo '========== Running Tests =========='
-                sh '/usr/bin/pip3 install pytest --break-system-packages'
+                sh '/usr/bin/pip3 install pytest'
                 sh 'python3 -m pytest test_app.py -v'
             }
         }
@@ -58,20 +58,4 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo '========== Deploying Container =========='
-                sh "docker stop week12-app || true"
-                sh "docker rm week12-app || true"
-                sh "docker run -d --name week12-app -p 8888:8888 ${DOCKER_IMAGE}:latest"
-                echo 'App deployed successfully on port 8888!'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '========== PIPELINE COMPLETED SUCCESSFULLY! =========='
-        }
-        failure {
-            echo '========== PIPELINE FAILED! =========='
-        }
-    }
-}
+                sh "docker stop week12-app
